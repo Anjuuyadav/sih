@@ -1,0 +1,37 @@
+const express = require('express');
+const cors = require('cors');
+// const helmet = require('helmet');
+// const morgan = require('morgan');
+const authRoutes = require('./routes/authRoutes');
+// const adminDoctorRoutes = require('./routes/adminDoctorRoutes');
+// const adminTherapyRoutes = require('./routes/adminTherapyRoutes');
+// const adminSymptomRoutes = require('./routes/adminSymptomRoutes');
+// const adminPrecautionRoutes = require('./routes/adminPrecautionRoutes');
+const errorMiddleware = require('./middlewares/errorMiddleware');
+
+const app = express();
+const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+
+// app.use(helmet());
+app.use(cors({ origin: allowedOrigin, credentials: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(morgan('dev'));
+
+app.get('/', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Panchkarma Backend is running'
+    });
+});
+
+app.use('/api/auth', authRoutes);
+// app.use('/api/admin/doctors', adminDoctorRoutes);
+// app.use('/api/admin/therapies', adminTherapyRoutes);
+// app.use('/api/admin/symptoms', adminSymptomRoutes);
+// app.use('/api/admin/precautions', adminPrecautionRoutes);
+
+
+app.use(errorMiddleware);
+
+module.exports = app;
