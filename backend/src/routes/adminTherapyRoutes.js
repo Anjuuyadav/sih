@@ -1,0 +1,18 @@
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/adminTherapyController');
+const authMiddleware = require('../middlewares/authMiddleware');
+const authorizeRoles = require('../middlewares/roleMiddleware');
+const { body, param } = require('express-validator');
+const adminOnly = [authMiddleware, authorizeRoles('Admin')];
+const therapyValidator = [body('therapyName').trim().notEmpty(), body('cost').isFloat({ min: 0 }), body('duration').isInt({ min: 1 }), body('description').optional({ nullable: true }).isString()];
+const id = param('id').isInt();
+const precautionValidator = [body('precautionType').isIn(['PRE', 'POST']), body('precautionText').trim().notEmpty()];
+router.get('/', ...adminOnly, controller.getTherapies);
+router.post('/', ...adminOnly, therapyValidator, controller.createTherapy);
+router.get('/:id', ...adminOnly, id, controller.getTherapyById);
+router.put('/:id', ...adminOnly, id, therapyValidator, controller.updateTherapy);
+router.delete('/:id', ...adminOnly, id, controller.deleteTherapy);
+router.get('/:therapyId/precautions', ...adminOnly, param('therapyId').isInt(), controller.getPrecautions);
+router.post('/:therapyId/precautions', ...adminOnly, param('therapyId').isInt(), precautionValidator, controller.createPrecaution);
+module.exports = router;

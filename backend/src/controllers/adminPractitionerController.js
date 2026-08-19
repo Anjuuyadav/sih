@@ -1,66 +1,12 @@
 const { validationResult } = require('express-validator');
-const adminDoctorService = require('../services/adminPractiotionerService');
-const responseHelper = require('../utils/responseHelper');
+const service = require('../services/adminPractitionerService');
+const response = require('../utils/responseHelper');
 
-const createDoctor = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return responseHelper.validationError(res, errors.array());
-    }
-
-    await adminDoctorService.createDoctor(req.body);
-    return responseHelper.created(res, { message: 'Doctor created successfully' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getDoctors = async (req, res, next) => {
-  try {
-    const doctors = await adminDoctorService.getDoctors();
-    return responseHelper.ok(res, { doctors });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getDoctorById = async (req, res, next) => {
-  try {
-    const doctor = await adminDoctorService.getDoctorById(req.params.id);
-    return responseHelper.ok(res, { doctor });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const updateDoctor = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return responseHelper.validationError(res, errors.array());
-    }
-
-    const doctor = await adminDoctorService.updateDoctor(req.params.id, req.body);
-    return responseHelper.ok(res, { message: 'Doctor updated successfully', doctor });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const deleteDoctor = async (req, res, next) => {
-  try {
-    await adminDoctorService.deleteDoctor(req.params.id);
-    return responseHelper.ok(res, { message: 'Doctor deleted successfully' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-module.exports = {
-  createDoctor,
-  getDoctors,
-  getDoctorById,
-  updateDoctor,
-  deleteDoctor,
-};
+const validate = (req, res) => { const errors = validationResult(req); return errors.isEmpty() || response.validationError(res, errors.array()); };
+const createPractitioner = async (req, res, next) => { try { if (!validate(req, res)) return; const practitioner = await service.createPractitioner(req.body); return response.created(res, { practitioner }); } catch (error) { next(error); } };
+const getPractitioners = async (req, res, next) => { try { return response.ok(res, { practitioners: await service.getPractitioners() }); } catch (error) { next(error); } };
+const getPractitionerById = async (req, res, next) => { try { if (!validate(req, res)) return; return response.ok(res, { practitioner: await service.getPractitionerById(req.params.id) }); } catch (error) { next(error); } };
+const updatePractitioner = async (req, res, next) => { try { if (!validate(req, res)) return; return response.ok(res, { practitioner: await service.updatePractitioner(req.params.id, req.body) }); } catch (error) { next(error); } };
+const deletePractitioner = async (req, res, next) => { try { if (!validate(req, res)) return; await service.deletePractitioner(req.params.id); return response.ok(res, { message: 'Practitioner deactivated successfully' }); } catch (error) { next(error); } };
+const getAvailability = async (req, res, next) => { try { if (!validate(req, res)) return; return response.ok(res, { availability: await service.getAvailability(req.params.id) }); } catch (error) { next(error); } };
+module.exports = { createPractitioner, getPractitioners, getPractitionerById, updatePractitioner, deletePractitioner, getAvailability };

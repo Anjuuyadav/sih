@@ -1,92 +1,23 @@
-const bcrypt = require('bcrypt');
-const doctorRepository = require('../repositories/doctorRepository');
-const userRepository = require('../repositories/userRepository');
-const { ConflictError, NotFoundError, BadRequestError } = require('../utils/errors');
+const repository = require('../repositories/practitonerRepository');
+const { NotFoundError, ConflictError } = require('../utils/errors');
 
-const createPractitioner = async (data) => {
-  const { name, email, phone, password, specialization, qualification, experienceYears, dailyPatientLimit, startTime, endTime } = data;
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-
-  const existingUserByEmail = await userRepository.getUserByEmail(normalizedEmail);
-  if (existingUserByEmail) {
-    throw new ConflictError('Email already exists');
-  }
-
-  const existingUserByPhone = await userRepository.getUserByPhone(phone);
-  if (existingUserByPhone) {
-    throw new ConflictError('Phone already exists');
-  }
-
-  const passwordHash = await bcrypt.hash(String(password || ''), 12);
-
-  await doctorRepository.createPractitionerWithUser({
-    name,
-    email: normalizedEmail,
-    phone,
-    passwordHash,
-    specialization,
-    qualification,
-    experienceYears,
-    dailyPatientLimit,
-    startTime,
-    endTime,
-  });
+const createPractitioner = async (data) => { try { return await repository.createPractitioner({ ...data, role: 'Practitioner' }); } catch (error) { if (error.number === 2627 || error.number === 2601) throw new ConflictError('Email already exists'); throw error; } };
+const getPractitioners = () => repository.getPractitioners();
+const getPractitionerById = async (id) => {
+  const practitioner = await repository.getPractitionerById(id);
+  if (!practitioner) throw new NotFoundError('Practitioner not found');
+  return practitioner;
 };
-
-const getDoctors = async () => {
-  return doctorRepository.getDoctors();
+const updatePractitioner = async (id, data) => {
+  await getPractitionerById(id);
+  try { return await repository.updatePractitioner(id, { ...data, role: 'Practitioner' }); } catch (error) {
+    if (error.number === 2627 || error.number === 2601) throw new ConflictError('Email already exists');
+    throw error;
+  }
 };
-
-const getDoctorById = async (id) => {
-  const doctor = await doctorRepository.getDoctorById(id);
-  if (!doctor) {
-    throw new NotFoundError('Doctor not found');
-  }
-  return doctor;
+const deletePractitioner = async (id) => {
+  await getPractitionerById(id);
+  return repository.softDeletePractitioner(id);
 };
-
-const updateDoctor = async (id, data) => {
-  const existingDoctor = await doctorRepository.getDoctorById(id);
-  if (!existingDoctor) {
-    throw new NotFoundError('Doctor not found');
-  }
-
-  const payload = { ...data };
-  if (payload.password) {
-    payload.password = await bcrypt.hash(String(payload.password), 12);
-  }
-
-  const normalizedEmail = payload.email ? String(payload.email).trim().toLowerCase() : existingDoctor.Email;
-  if (payload.email && normalizedEmail !== existingDoctor.Email) {
-    const emailUser = await userRepository.getUserByEmail(normalizedEmail);
-    if (emailUser && emailUser.UserId !== existingDoctor.UserId) {
-      throw new ConflictError('Email already exists');
-    }
-  }
-
-  if (payload.phone && payload.phone !== existingDoctor.Phone) {
-    const phoneUser = await userRepository.getUserByPhone(payload.phone);
-    if (phoneUser && phoneUser.UserId !== existingDoctor.UserId) {
-      throw new ConflictError('Phone already exists');
-    }
-  }
-
-  return doctorRepository.updateDoctor(id, { ...payload, email: normalizedEmail });
-};
-
-const deleteDoctor = async (id) => {
-  const doctor = await doctorRepository.getDoctorById(id);
-  if (!doctor) {
-    throw new NotFoundError('Doctor not found');
-  }
-
-  await doctorRepository.softDeleteDoctor(id);
-};
-
-module.exports = {
-  createPractitioner,
-  getDoctors,
-  getDoctorById,
-  updateDoctor,
-  deleteDoctor,
-};
+const getAvailability = async (id) => { await getPractitionerById(id); return repository.getAvailability(id); };
+module.exports = { createPractitioner, getPractitioners, getPractitionerById, updatePractitioner, deletePractitioner, getAvailability };

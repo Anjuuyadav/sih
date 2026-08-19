@@ -1,0 +1,13 @@
+const therapyRepository = require('../repositories/therapyRepository');
+const precautionRepository = require('../repositories/precautionRepository');
+const { NotFoundError, ConflictError } = require('../utils/errors');
+const getTherapies = () => therapyRepository.getTherapies();
+const getTherapyById = async (id) => { const therapy = await therapyRepository.getTherapyById(id); if (!therapy) throw new NotFoundError('Therapy not found'); return therapy; };
+const createTherapy = async (data) => { try { return await therapyRepository.createTherapy(data); } catch (error) { if (error.number === 2627 || error.number === 2601) throw new ConflictError('Therapy name already exists'); throw error; } };
+const updateTherapy = async (id, data) => { await getTherapyById(id); return therapyRepository.updateTherapy(id, data); };
+const deleteTherapy = async (id) => { await getTherapyById(id); return therapyRepository.softDeleteTherapy(id); };
+const getPrecautions = async (therapyId) => { await getTherapyById(therapyId); return precautionRepository.getPrecautions(therapyId); };
+const createPrecaution = async (therapyId, data) => { await getTherapyById(therapyId); return precautionRepository.createPrecaution(therapyId, data); };
+const updatePrecaution = async (id, data) => { if (!await precautionRepository.getPrecautionById(id)) throw new NotFoundError('Precaution not found'); return precautionRepository.updatePrecaution(id, data); };
+const deletePrecaution = async (id) => { if (!await precautionRepository.getPrecautionById(id)) throw new NotFoundError('Precaution not found'); return precautionRepository.deletePrecaution(id); };
+module.exports = { getTherapies, getTherapyById, createTherapy, updateTherapy, deleteTherapy, getPrecautions, createPrecaution, updatePrecaution, deletePrecaution };

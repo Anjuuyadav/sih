@@ -1,0 +1,14 @@
+const { validationResult } = require('express-validator');
+const service = require('../services/adminTherapyService');
+const response = require('../utils/responseHelper');
+const valid = (req, res) => { const errors = validationResult(req); return errors.isEmpty() || response.validationError(res, errors.array()); };
+const createTherapy = async (req, res, next) => { try { if (!valid(req, res)) return; return response.created(res, { therapy: await service.createTherapy(req.body) }); } catch (error) { next(error); } };
+const getTherapies = async (req, res, next) => { try { return response.ok(res, { therapies: await service.getTherapies() }); } catch (error) { next(error); } };
+const getTherapyById = async (req, res, next) => { try { return response.ok(res, { therapy: await service.getTherapyById(req.params.id) }); } catch (error) { next(error); } };
+const updateTherapy = async (req, res, next) => { try { if (!valid(req, res)) return; return response.ok(res, { therapy: await service.updateTherapy(req.params.id, req.body) }); } catch (error) { next(error); } };
+const deleteTherapy = async (req, res, next) => { try { await service.deleteTherapy(req.params.id); return response.ok(res, { message: 'Therapy deactivated successfully' }); } catch (error) { next(error); } };
+const getPrecautions = async (req, res, next) => { try { return response.ok(res, { precautions: await service.getPrecautions(req.params.therapyId) }); } catch (error) { next(error); } };
+const createPrecaution = async (req, res, next) => { try { if (!valid(req, res)) return; return response.created(res, { precaution: await service.createPrecaution(req.params.therapyId, req.body) }); } catch (error) { next(error); } };
+const updatePrecaution = async (req, res, next) => { try { if (!valid(req, res)) return; return response.ok(res, { precaution: await service.updatePrecaution(req.params.precautionId, req.body) }); } catch (error) { next(error); } };
+const deletePrecaution = async (req, res, next) => { try { await service.deletePrecaution(req.params.precautionId); return response.ok(res, { message: 'Precaution deleted successfully' }); } catch (error) { next(error); } };
+module.exports = { createTherapy, getTherapies, getTherapyById, updateTherapy, deleteTherapy, getPrecautions, createPrecaution, updatePrecaution, deletePrecaution };

@@ -6,15 +6,17 @@ export const AuthContext = createContext({
   logout: () => {},
 });
 
+const normalizeUser = (value) => value ? { ...value, role: value.role ? String(value.role).trim().toLowerCase() : value.role } : null;
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
+    return storedUser ? normalizeUser(JSON.parse(storedUser)) : null;
   });
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify(normalizeUser(user)));
     } else {
       localStorage.removeItem('user');
       localStorage.removeItem('token');

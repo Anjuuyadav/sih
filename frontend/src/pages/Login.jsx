@@ -4,6 +4,8 @@ import { FiLock, FiMail, FiLoader, FiShield } from 'react-icons/fi';
 import { login } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
 
+const getRoleRedirect = (role) => (String(role || '').trim().toLowerCase() === 'admin' ? '/admin' : '/dashboard');
+
 const Login = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(AuthContext);
@@ -14,7 +16,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard', { replace: true });
+      navigate(getRoleRedirect(user.role), { replace: true });
     }
   }, [user, navigate]);
 
@@ -30,9 +32,10 @@ const Login = () => {
 
     try {
       const response = await login(formData);
-      setUser(response.user);
+      const loggedInUser = { ...response.user, role: String(response.user?.role || '').trim().toLowerCase() };
+      setUser(loggedInUser);
       setToast({ type: 'success', message: 'Welcome back! Redirecting to your dashboard.' });
-      setTimeout(() => navigate('/dashboard'), 700);
+      navigate(getRoleRedirect(loggedInUser.role), { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
       setToast({ type: 'error', message: err.response?.data?.message || 'Login failed.' });

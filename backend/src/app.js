@@ -3,10 +3,9 @@ const cors = require('cors');
 // const helmet = require('helmet');
 // const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
-// const adminDoctorRoutes = require('./routes/adminDoctorRoutes');
-// const adminTherapyRoutes = require('./routes/adminTherapyRoutes');
-// const adminSymptomRoutes = require('./routes/adminSymptomRoutes');
-// const adminPrecautionRoutes = require('./routes/adminPrecautionRoutes');
+const adminPractitionerRoutes = require('./routes/adminPractitionerRoutes');
+const adminTherapyRoutes = require('./routes/adminTherapyRoutes');
+const adminPrecautionRoutes = require('./routes/adminPrecautionRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -26,10 +25,9 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-// app.use('/api/admin/doctors', adminDoctorRoutes);
-// app.use('/api/admin/therapies', adminTherapyRoutes);
-// app.use('/api/admin/symptoms', adminSymptomRoutes);
-// app.use('/api/admin/precautions', adminPrecautionRoutes);
+app.use('/api/admin/practitioners', adminPractitionerRoutes);
+app.use('/api/admin/therapies', adminTherapyRoutes);
+app.use('/api/admin/therapy-precautions', adminPrecautionRoutes);
 
 
 app.use(errorMiddleware);
