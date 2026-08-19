@@ -6,6 +6,12 @@ const authRoutes = require('./routes/authRoutes');
 const adminPractitionerRoutes = require('./routes/adminPractitionerRoutes');
 const adminTherapyRoutes = require('./routes/adminTherapyRoutes');
 const adminPrecautionRoutes = require('./routes/adminPrecautionRoutes');
+const availabilityRoutes = require('./routes/availabilityRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const practitionerRequestRoutes = require('./routes/practitionerRequestRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const patientAppointmentRoutes = require('./routes/patientAppointmentRoutes');
+const patientTherapyRoutes = require('./routes/patientTherapyRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -28,6 +34,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin/practitioners', adminPractitionerRoutes);
 app.use('/api/admin/therapies', adminTherapyRoutes);
 app.use('/api/admin/therapy-precautions', adminPrecautionRoutes);
+app.use('/api/availability', availabilityRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/practitioner', practitionerRequestRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/patient', patientAppointmentRoutes);
+app.use('/api/patient/therapies', patientTherapyRoutes);
 
 
 app.use(errorMiddleware);
