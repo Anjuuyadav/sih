@@ -11,7 +11,9 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    contactNumber: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [error, setError] = useState('');
@@ -41,8 +43,37 @@ const Register = () => {
     setSuccess('');
     setIsLoading(true);
 
+    const normalizedName = String(formData.name || '').trim();
+    const normalizedEmail = String(formData.email || '').trim();
+    const normalizedContactNumber = String(formData.contactNumber || '')
+      .trim()
+      .replace(/\s+/g, '');
+
+    if (!normalizedName || !normalizedEmail || !normalizedContactNumber || !formData.password || !formData.confirmPassword) {
+      setError('All fields are required.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(normalizedContactNumber)) {
+      setError('Contact Number must be a valid 10-digit Indian mobile number.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Password and Confirm Password must match.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await registerPatient(formData);
+      await registerPatient({
+        name: normalizedName,
+        email: normalizedEmail,
+        contactNumber: normalizedContactNumber,
+        password: formData.password,
+      });
 
       setSuccess('Registration successful. You can sign in now.');
       setToast({
@@ -174,6 +205,27 @@ const Register = () => {
               <div>
                 <label
                   className="mb-2 block text-sm font-medium text-slate-700"
+                  htmlFor="contactNumber"
+                >
+                  Contact Number
+                </label>
+
+                <input
+                  id="contactNumber"
+                  type="tel"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your 10-digit mobile number"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-100"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label
+                  className="mb-2 block text-sm font-medium text-slate-700"
                   htmlFor="password"
                 >
                   Password
@@ -187,6 +239,27 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   placeholder="Create a password"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-100"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                  htmlFor="confirmPassword"
+                >
+                  Confirm Password
+                </label>
+
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm your password"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-100"
                 />
               </div>

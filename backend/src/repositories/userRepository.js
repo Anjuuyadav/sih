@@ -16,18 +16,19 @@ const getUserByEmail = async (email) => {
   return result.recordset[0];
 };
 
-const createUser = async ({ name, email, passwordHash, role, status }) => {
+const createUser = async ({ name, email, contactNumber, passwordHash, role, status }) => {
   const pool = await ensurePool();
   const result = await pool.request()
     .input('name', sql.VarChar(255), name)
     .input('email', sql.VarChar(255), email)
+    .input('contactNumber', sql.VarChar(15), contactNumber)
     .input('passwordHash', sql.VarChar(255), passwordHash)
     .input('role', sql.VarChar(50), role)
     .input('status', sql.VarChar(50), status)
     .query(
-      `INSERT INTO Users (Name, Email, PasswordHash, Role, Status, CreatedAt, UpdatedAt)
+      `INSERT INTO Users (Name, Email, ContactNumber, PasswordHash, Role, Status, CreatedAt, UpdatedAt)
        OUTPUT INSERTED.*
-       VALUES (@name, @email, @passwordHash, @role, @status, GETUTCDATE(), GETUTCDATE())`
+       VALUES (@name, @email, @contactNumber, @passwordHash, @role, @status, GETUTCDATE(), GETUTCDATE())`
     );
   return result.recordset[0];
 };

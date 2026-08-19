@@ -4,12 +4,19 @@ BEGIN
         UserId INT IDENTITY(1,1) PRIMARY KEY,
         Name NVARCHAR(255) NOT NULL,
         Email NVARCHAR(255) NOT NULL UNIQUE,
+        ContactNumber VARCHAR(15) NULL,
         PasswordHash NVARCHAR(500) NOT NULL,
         Role NVARCHAR(50) NOT NULL,
         Status NVARCHAR(50) NOT NULL,
         CreatedAt DATETIME2 DEFAULT GETUTCDATE(),
         UpdatedAt DATETIME2 DEFAULT GETUTCDATE()
     );
+END
+
+IF COL_LENGTH('dbo.Users', 'ContactNumber') IS NULL
+BEGIN
+    ALTER TABLE dbo.Users
+    ADD ContactNumber VARCHAR(15) NULL;
 END
 
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Therapies')
@@ -83,4 +90,9 @@ END
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_PractitionerAvailability_Day')
     CREATE UNIQUE INDEX UX_PractitionerAvailability_Day ON dbo.PractitionerAvailability(PractitionerId, DayOfWeek);
 
-
+IF COL_LENGTH('dbo.Practitioners', 'Rating') IS NULL
+BEGIN
+    ALTER TABLE dbo.Practitioners
+    ADD Rating DECIMAL(3,2) NULL;
+END
+GO

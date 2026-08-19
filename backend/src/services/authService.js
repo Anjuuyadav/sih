@@ -8,8 +8,9 @@ const INVALID_CREDENTIALS = 'Invalid email or password';
 const USER_INACTIVE = 'User account is inactive';
 
 const register = async (data) => {
-  const { name, email, password, registrationDate } = data;
+  const { name, email, contactNumber, password, registrationDate } = data;
   const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedContactNumber = String(contactNumber || '').trim().replace(/\s+/g, '');
 
   const existingByEmail = await userRepository.getUserByEmail(normalizedEmail);
   if (existingByEmail) {
@@ -21,6 +22,7 @@ const register = async (data) => {
   const userPayload = {
     name,
     email: normalizedEmail,
+    contactNumber: normalizedContactNumber,
     passwordHash,
     role: 'Patient',
     status: 'Active',

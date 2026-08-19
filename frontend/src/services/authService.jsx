@@ -3,7 +3,13 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/auth';
 
 export const registerPatient = async (registerData) => {
-  const response = await axios.post(`${API_URL}/register`, registerData);
+  const payload = {
+    name: String(registerData?.name || '').trim(),
+    email: String(registerData?.email || '').trim(),
+    contactNumber: String(registerData?.contactNumber || '').trim().replace(/\s+/g, ''),
+    password: registerData?.password || '',
+  };
+  const response = await axios.post(`${API_URL}/register`, payload);
   return response.data;
 };
 
