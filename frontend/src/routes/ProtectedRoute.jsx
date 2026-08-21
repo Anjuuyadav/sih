@@ -15,3 +15,7 @@ const ProtectedRoute = ({ allowedRoles, redirectTo = '/login' }) => {
 };
 
 export default ProtectedRoute;
+
+
+
+

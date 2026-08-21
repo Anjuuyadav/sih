@@ -4,7 +4,14 @@ import { FiLock, FiMail, FiLoader, FiShield } from 'react-icons/fi';
 import { login } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
 
-const getRoleRedirect = (role) => (String(role || '').trim().toLowerCase() === 'admin' ? '/admin' : '/dashboard');
+const getRoleRedirect = (role) => {
+  const normalizedRole = String(role || '').trim().toLowerCase();
+
+  if (normalizedRole === 'admin') return '/admin';
+  if (normalizedRole === 'patient') return '/patient/dashboard';
+  if (normalizedRole === 'practitioner') return '/practitioner/dashboard';
+  return '/dashboard';
+};
 
 const Login = () => {
   const navigate = useNavigate();
