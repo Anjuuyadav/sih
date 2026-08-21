@@ -12,6 +12,7 @@ const practitionerRequestRoutes = require('./routes/practitionerRequestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const patientAppointmentRoutes = require('./routes/patientAppointmentRoutes');
 const patientTherapyRoutes = require('./routes/patientTherapyRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -40,7 +41,7 @@ app.use('/api/practitioner', practitionerRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/patient', patientAppointmentRoutes);
 app.use('/api/patient/therapies', patientTherapyRoutes);
-
+app.use('/api/feedback', feedbackRoutes);
 
 app.use(errorMiddleware);
 
