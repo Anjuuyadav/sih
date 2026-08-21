@@ -20,6 +20,7 @@ async function createMessage() {
   } catch (error) {
     console.error("SMS FAILED");
     console.error(error);
+    colsole.error("do some change");
   }
 }
 
