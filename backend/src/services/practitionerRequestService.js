@@ -2,9 +2,37 @@ const repository = require('../repositories/practitionerRequestRepository');
 const notificationService = require('./notificationService');
 const { BadRequestError, ConflictError, ForbiddenError, NotFoundError } = require('../utils/errors');
 
+// const toMinutes = (value) => {
+//   const match = String(value || '').match(/^(\d{2}):(\d{2})/);
+//   return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+// };
 const toMinutes = (value) => {
-  const match = String(value || '').match(/^(\d{2}):(\d{2})/);
-  return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+  if (value instanceof Date) {
+    return value.getUTCHours() * 60 + value.getUTCMinutes();
+  }
+
+  const text = String(value || '').trim();
+
+  // Handles HH:mm or HH:mm:ss
+  const match = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  if (
+    !Number.isInteger(hours)
+    || !Number.isInteger(minutes)
+    || hours < 0
+    || hours > 23
+    || minutes < 0
+    || minutes > 59
+  ) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
 };
 
 const toDateKey = (value) => {
@@ -154,6 +182,14 @@ const acceptRequest = async (therapyPlanId, authenticatedUser) => {
       practitioner.PractitionerId,
       therapyPlanId
     );
+    console.log('========== ACCEPT REQUEST DEBUG ==========');
+console.log('therapyPlanId:', therapyPlanId);
+console.log('practitionerId:', practitioner.PractitionerId);
+console.log('plan:', plan);
+console.log('plan.Status:', plan?.Status);
+console.log('plan.therapyIsActive:', plan?.therapyIsActive);
+console.log('plan.practitionerIsActive:', plan?.practitionerIsActive);
+console.log('==========================================');
     if (!plan) {
       const owner = await repository.getTherapyPlanOwnerForUpdate(transaction, therapyPlanId);
       if (owner) throw new ForbiddenError('You do not have access to this session request');
@@ -165,11 +201,45 @@ const acceptRequest = async (therapyPlanId, authenticatedUser) => {
 
     const sessions = await repository.getTherapySessionsForUpdate(transaction, therapyPlanId);
     assertPendingSessions(sessions, plan.NumberOfSessions);
+     console.log('========== SESSION DEBUG ==========');
+console.log('sessions:', sessions);
+console.log('expected sessions:', plan.NumberOfSessions);
+console.log('actual sessions:', sessions.length);
+console.log('===================================');
+
+assertPendingSessions(sessions, plan.NumberOfSessions);
+
+console.log('✅ assertPendingSessions PASSED');
+
     const availability = await repository.getPractitionerAvailabilityForUpdate(
       transaction,
       practitioner.PractitionerId
     );
+
+    console.log('========== AVAILABILITY DEBUG ==========');
+console.log('availability:', availability);
+console.log('========================================');
+
+
     validateCurrentAvailability(plan, sessions, availability);
+
+    console.log('VALIDATION INPUT:', {
+  duration: plan.DurationMinutes,
+  sessions: sessions.map((s) => ({
+    date: s.SessionDate,
+    start: s.StartTime,
+    startMinutes: toMinutes(s.StartTime),
+    end: s.EndTime,
+    endMinutes: toMinutes(s.EndTime),
+  })),
+  availability: availability.map((a) => ({
+    day: a.DayOfWeek,
+    start: a.StartTime,
+    startMinutes: toMinutes(a.StartTime),
+    end: a.EndTime,
+    endMinutes: toMinutes(a.EndTime),
+  })),
+});
 
     const sessionIds = sessions.map((session) => session.SessionId);
     for (const session of sessions) {

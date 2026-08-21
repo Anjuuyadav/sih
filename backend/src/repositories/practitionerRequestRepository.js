@@ -8,6 +8,30 @@ const ensurePool = async () => {
   return pool;
 };
 
+const formatSqlTime = (value) => {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    const hours = String(value.getUTCHours()).padStart(2, '0');
+    const minutes = String(value.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(value.getUTCSeconds()).padStart(2, '0');
+
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  if (typeof value === 'string') {
+    const parts = value.split(':');
+
+    const hours = String(parts[0] || '00').padStart(2, '0');
+    const minutes = String(parts[1] || '00').padStart(2, '0');
+    const seconds = String(parts[2] || '00').padStart(2, '0');
+
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  throw new Error(`Invalid SQL time value: ${value}`);
+};
+
 const getTransaction = async () => {
   const pool = await ensurePool();
   const transaction = new sql.Transaction(pool);
@@ -137,14 +161,35 @@ const getRequestOwner = async (therapyPlanId) => {
   return result.recordset[0] || null;
 };
 
+// const getTherapyPlanForUpdate = async (transaction, practitionerId, therapyPlanId) => {
+//   const result = await transaction.request()
+//     .input('practitionerId', sql.Int, practitionerId)
+//     .input('therapyPlanId', sql.Int, therapyPlanId)
+//     .query(`${planSelect.replace('FROM dbo.TherapyPlans p', 'FROM dbo.TherapyPlans p WITH (UPDLOCK, HOLDLOCK)')}
+//       WHERE p.PractitionerId = @practitionerId
+//         AND p.TherapyPlanId = @therapyPlanId`);
+//   return result.recordset[0] || null;
+// };
 const getTherapyPlanForUpdate = async (transaction, practitionerId, therapyPlanId) => {
   const result = await transaction.request()
     .input('practitionerId', sql.Int, practitionerId)
     .input('therapyPlanId', sql.Int, therapyPlanId)
-    .query(`${planSelect.replace('FROM dbo.TherapyPlans p', 'FROM dbo.TherapyPlans p WITH (UPDLOCK, HOLDLOCK)')}
+    .query(`${planSelect.replace(
+      'FROM dbo.TherapyPlans p',
+      'FROM dbo.TherapyPlans p WITH (UPDLOCK, HOLDLOCK)'
+    )}
       WHERE p.PractitionerId = @practitionerId
         AND p.TherapyPlanId = @therapyPlanId`);
-  return result.recordset[0] || null;
+
+  const row = result.recordset[0];
+
+  if (!row) return null;
+
+  return {
+    ...row,
+    therapyIsActive: Boolean(row.TherapyIsActive),
+    practitionerIsActive: Boolean(row.PractitionerIsActive),
+  };
 };
 
 const getTherapyPlanOwnerForUpdate = async (transaction, therapyPlanId) => {
@@ -178,26 +223,68 @@ const getPractitionerAvailabilityForUpdate = async (transaction, practitionerId)
   return result.recordset;
 };
 
-const findConflictingSessions = async (transaction, session, excludedSessionIds) => {
+// const findConflictingSessions = async (transaction, session, excludedSessionIds) => {
+//     const startTime = formatSqlTime(session.StartTime);
+//   const endTime = formatSqlTime(session.EndTime);
+
+//   const request = transaction.request()
+
+  
+//     .input('practitionerId', sql.Int, session.PractitionerId)
+//     .input('sessionDate', sql.Date, session.SessionDate)
+//     .input('startTime', sql.VarChar(8), session.StartTime)
+//     .input('endTime', sql.VarChar(8), session.EndTime);
+//   const exclusions = excludedSessionIds.map((id, index) => {
+//     const parameter = `excludedSessionId${index}`;
+//     request.input(parameter, sql.Int, id);
+//     return `@${parameter}`;
+//   });
+//   const exclusionClause = exclusions.length ? `AND SessionId NOT IN (${exclusions.join(', ')})` : '';
+//   const result = await request.query(`SELECT TOP (1) SessionId, TherapyPlanId
+//     FROM dbo.TherapySessions WITH (UPDLOCK, HOLDLOCK)
+//     WHERE PractitionerId = @practitionerId
+//       AND SessionDate = @sessionDate
+//       AND Status IN ('PENDING', 'CONFIRMED')
+//       AND StartTime < CONVERT(TIME, @endTime)
+//       AND EndTime > CONVERT(TIME, @startTime)
+//       ${exclusionClause}`);
+//   return result.recordset[0] || null;
+// };
+
+const findConflictingSessions = async (
+  transaction,
+  session,
+  excludedSessionIds
+) => {
   const request = transaction.request()
     .input('practitionerId', sql.Int, session.PractitionerId)
     .input('sessionDate', sql.Date, session.SessionDate)
-    .input('startTime', sql.VarChar(8), session.StartTime)
-    .input('endTime', sql.VarChar(8), session.EndTime);
+    .input('startTime', sql.Time, session.StartTime)
+    .input('endTime', sql.Time, session.EndTime);
+
   const exclusions = excludedSessionIds.map((id, index) => {
     const parameter = `excludedSessionId${index}`;
     request.input(parameter, sql.Int, id);
     return `@${parameter}`;
   });
-  const exclusionClause = exclusions.length ? `AND SessionId NOT IN (${exclusions.join(', ')})` : '';
-  const result = await request.query(`SELECT TOP (1) SessionId, TherapyPlanId
+
+  const exclusionClause = exclusions.length
+    ? `AND SessionId NOT IN (${exclusions.join(', ')})`
+    : '';
+
+  const result = await request.query(`
+    SELECT TOP (1)
+      SessionId,
+      TherapyPlanId
     FROM dbo.TherapySessions WITH (UPDLOCK, HOLDLOCK)
     WHERE PractitionerId = @practitionerId
       AND SessionDate = @sessionDate
       AND Status IN ('PENDING', 'CONFIRMED')
       AND StartTime < CONVERT(TIME, @endTime)
       AND EndTime > CONVERT(TIME, @startTime)
-      ${exclusionClause}`);
+      ${exclusionClause}
+  `);
+
   return result.recordset[0] || null;
 };
 

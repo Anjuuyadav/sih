@@ -110,14 +110,47 @@ const createSmsClient = () => {
   return twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 };
 
+const normalizePhoneNumber = (phone) => {
+  if (!phone) return null;
+
+  const cleaned = String(phone).replace(/\D/g, '');
+
+  if (cleaned.length === 10) {
+    return `+91${cleaned}`;
+  }
+
+  if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    return `+${cleaned}`;
+  }
+
+  return phone;
+};
+
+// const sendSmsNotification = async (context, content) => {
+//   if (providerOverrides.sms) return providerOverrides.sms(context, content);
+//   if (!context.ContactNumber) throw new Error('Patient contact number is missing.');
+//   const client = createSmsClient();
+//   await client.messages.create({
+//     body: content.sms,
+//     from: process.env.TWILIO_PHONE_NUMBER,
+//     to: context.ContactNumber,
+//   });
+// };
 const sendSmsNotification = async (context, content) => {
-  if (providerOverrides.sms) return providerOverrides.sms(context, content);
-  if (!context.ContactNumber) throw new Error('Patient contact number is missing.');
+  if (providerOverrides.sms) {
+    return providerOverrides.sms(context, content);
+  }
+
+  if (!context.ContactNumber) {
+    throw new Error('Patient contact number is missing.');
+  }
+
   const client = createSmsClient();
+
   await client.messages.create({
-    body: content.sms,
+    body: 'sms_appointment_reminders',
     from: process.env.TWILIO_PHONE_NUMBER,
-    to: context.ContactNumber,
+    to: normalizePhoneNumber(context.ContactNumber),
   });
 };
 

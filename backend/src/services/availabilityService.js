@@ -6,6 +6,9 @@ const MAX_SEARCH_DAYS = 3650;
 const BLOCKING_STATUSES = new Set(['PENDING', 'CONFIRMED']);
 
 const toMinutes = (value) => {
+  if (value instanceof Date) {
+    return value.getUTCHours() * 60 + value.getUTCMinutes();
+  }
   const match = String(value || '').match(/^(\d{2}):(\d{2})(?::\d{2})?/);
   if (!match) return null;
   return Number(match[1]) * 60 + Number(match[2]);
@@ -37,7 +40,7 @@ const addDays = (date, days) => {
   return result;
 };
 
-const getDayOfWeek = (date) => {
+const getIsoDayOfWeek = (date) => {
   const day = date.getUTCDay();
   return day === 0 ? 7 : day;
 };
@@ -176,8 +179,9 @@ const buildSchedule = (practitioner, availabilityByPractitioner, sessionsByPract
 
   while (schedule.length < input.numberOfSessions && daysChecked < MAX_SEARCH_DAYS) {
     const dateKey = formatDate(date);
-    if (input.preferredDays.has(getDayOfWeek(date))) {
-      const windows = practitionerAvailability.get(getDayOfWeek(date)) || [];
+    const isoDayOfWeek = getIsoDayOfWeek(date);
+    if (input.preferredDays.has(isoDayOfWeek)) {
+      const windows = practitionerAvailability.get(isoDayOfWeek) || [];
       const bestTime = getBestTimeForDate(
         dateKey,
         windows,
@@ -264,6 +268,7 @@ module.exports = {
     groupAvailability,
     groupSessions,
     parseDate,
+    getIsoDayOfWeek,
     formatTime,
     formatDate,
     toMinutes,
