@@ -146,6 +146,9 @@ const createBooking = async (data, authenticatedUser) => {
   const transaction = await bookingRepository.getTransaction();
   try {
     const patient = await bookingRepository.getPatientByUserId(transaction, userId);
+    console.log('Authenticated user:', authenticatedUser);
+console.log('Resolved userId:', userId);
+console.log('Patient found:', patient);
     if (!patient) throw new NotFoundError('Patient profile not found for the authenticated user');
 
     const therapy = await bookingRepository.getTherapy(transaction, input.therapyId);

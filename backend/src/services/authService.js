@@ -28,13 +28,23 @@ const register = async (data) => {
     status: 'Active',
   };
 
-  await userRepository.createUser(userPayload);
-  // const createdUser = await userRepository.createUser(userPayload);
+  const transaction = await userRepository.getTransaction();
+  try {
+    const createdUser = await userRepository.createUserInTransaction(transaction, userPayload);
 
-  // await userRepository.createUser({
-  //   userId: createdUser.UserId,
-  //   registrationDate: registrationDate || new Date(),
-  // });
+    if (String(userPayload.role).trim().toLowerCase() === 'patient') {
+      await userRepository.createPatientProfile(transaction, createdUser.UserId);
+    }
+
+    await transaction.commit();
+  } catch (error) {
+    try {
+      await transaction.rollback();
+    } catch (rollbackError) {
+      // Preserve the original registration error.
+    }
+    throw error;
+  }
 };
 
 const login = async ({ email, password }) => {
