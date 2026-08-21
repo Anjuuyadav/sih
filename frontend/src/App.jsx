@@ -9,6 +9,7 @@ import AdminManagement from './pages/admin/AdminManagement';
 import BookTherapy from './pages/patient/BookTherapy';
 import MyAppointments from './pages/patient/MyAppointments';
 import Notifications from './pages/patient/Notifications';
+import Feedback from './pages/patient/Feedback';
 import PractitionerDashboard from './pages/practitioner/PractitionerDashboard';
 import SessionRequestDetails from './pages/practitioner/SessionRequestDetails';
 
@@ -60,19 +61,55 @@ const Dashboard = () => {
         </section>
 
         {String(user?.role || '').toLowerCase() === 'patient' && (
-          <section className="grid gap-4 sm:grid-cols-3">
-            <Link to="/patient/book" className="rounded-2xl bg-primary-600 p-5 text-white shadow-sm transition hover:bg-primary-700">
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            <Link
+              to="/patient/book"
+              className="rounded-2xl bg-primary-600 p-5 text-white shadow-sm transition hover:bg-primary-700"
+            >
               <p className="text-sm font-semibold">Book a therapy</p>
-              <p className="mt-2 text-sm text-blue-100">Find a practitioner for your complete schedule.</p>
+              <p className="mt-2 text-sm text-blue-100">
+                Find a practitioner for your complete schedule.
+              </p>
             </Link>
-            <Link to="/patient/appointments" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50">
-              <p className="text-sm font-semibold text-slate-900">My appointments</p>
-              <p className="mt-2 text-sm text-slate-500">Review plans, sessions, and statuses.</p>
+
+            <Link
+              to="/patient/appointments"
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50"
+            >
+              <p className="text-sm font-semibold text-slate-900">
+                My appointments
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Review plans, sessions, and statuses.
+              </p>
             </Link>
-            <Link to="/patient/notifications" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50">
-              <p className="text-sm font-semibold text-slate-900">Notifications</p>
-              <p className="mt-2 text-sm text-slate-500">See updates about your requests.</p>
+
+            <Link
+              to="/patient/notifications"
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50"
+            >
+              <p className="text-sm font-semibold text-slate-900">
+                Notifications
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                See updates about your requests.
+              </p>
             </Link>
+
+            <Link
+              to="/patient/feedback"
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50"
+            >
+              <p className="text-sm font-semibold text-slate-900">
+                Give feedback
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Share your therapy experience and get AI-powered sentiment
+                analysis.
+              </p>
+            </Link>
+
           </section>
         )}
 
@@ -136,6 +173,7 @@ const App = () => (
             <Route path="/admin" element={<AdminManagement />} />
           </Route>
 
+          {/* Patient Routes */}
           <Route
             element={
               <ProtectedRoute
@@ -148,8 +186,10 @@ const App = () => (
             <Route path="/patient/book" element={<BookTherapy />} />
             <Route path="/patient/appointments" element={<MyAppointments />} />
             <Route path="/patient/notifications" element={<Notifications />} />
+            <Route path="/patient/feedback" element={<Feedback />} />
           </Route>
 
+          {/* Practitioner Routes */}
           <Route
             element={
               <ProtectedRoute
@@ -158,11 +198,18 @@ const App = () => (
               />
             }
           >
-            <Route path="/practitioner/dashboard" element={<PractitionerDashboard />} />
-            <Route path="/practitioner/session-requests/:therapyPlanId" element={<SessionRequestDetails />} />
+            <Route
+              path="/practitioner/dashboard"
+              element={<PractitionerDashboard />}
+            />
+
+            <Route
+              path="/practitioner/session-requests/:therapyPlanId"
+              element={<SessionRequestDetails />}
+            />
           </Route>
 
-          {/* Patient Routes */}
+          {/* General Dashboard Routes */}
           <Route
             element={
               <ProtectedRoute
