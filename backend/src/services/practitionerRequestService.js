@@ -2,6 +2,8 @@ const repository = require('../repositories/practitionerRequestRepository');
 const notificationService = require('./notificationService');
 const { BadRequestError, ConflictError, ForbiddenError, NotFoundError } = require('../utils/errors');
 
+
+
 // const toMinutes = (value) => {
 //   const match = String(value || '').match(/^(\d{2}):(\d{2})/);
 //   return match ? Number(match[1]) * 60 + Number(match[2]) : null;
@@ -90,9 +92,9 @@ const mapRequest = (request) => ({
   sessions: mapSessions(request.sessions),
 });
 
-const listPendingRequests = async (authenticatedUser) => {
+const listRequests = async (authenticatedUser) => {
   const practitioner = await resolvePractitioner(authenticatedUser);
-  const requests = await repository.getPendingRequestsByPractitionerId(practitioner.PractitionerId);
+  const requests = await repository.getRequestsByPractitionerId(practitioner.PractitionerId);
   return requests.map(mapRequest);
 };
 
@@ -324,7 +326,7 @@ const rejectRequest = async (therapyPlanId, rejectionReason, authenticatedUser) 
 };
 
 module.exports = {
-  listPendingRequests,
+  listRequests,
   getRequestDetails,
   acceptRequest,
   rejectRequest,

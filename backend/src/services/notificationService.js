@@ -20,7 +20,39 @@ const formatDate = (value) => {
   }).format(date);
 };
 
-const formatTime = (value) => String(value || '').slice(0, 5);
+// const formatTime = (value) => String(value || '').slice(0, 5); change as it is not giving the proper time
+const formatTime = (value) => {
+  if (!value) return '';
+
+  // SQL TIME may come as "HH:mm:ss" or "HH:mm:ss.SSSSSSS"
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (match) {
+      const hours = Number(match[1]);
+      const minutes = Number(match[2]);
+
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+
+      return `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${period}`;
+    }
+  }
+
+  // If SQL Server returns a Date object
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return '';
+
+    const hours = value.getUTCHours();
+    const minutes = value.getUTCMinutes();
+
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+
+    return `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${period}`;
+  }
+
+  return String(value);
+};
 
 const practitionerName = (context) => [context.PractitionerFirstName, context.PractitionerLastName]
   .filter(Boolean)

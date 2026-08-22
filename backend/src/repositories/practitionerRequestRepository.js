@@ -119,13 +119,12 @@ const getPreferredDays = async (db, therapyPlanId) => {
   return result.recordset;
 };
 
-const getPendingRequestsByPractitionerId = async (practitionerId) => {
+const getRequestsByPractitionerId = async (practitionerId) => {
   const pool = await ensurePool();
   const result = await pool.request()
     .input('practitionerId', sql.Int, practitionerId)
     .query(`${planSelect}
       WHERE p.PractitionerId = @practitionerId
-        AND p.Status = 'PENDING'
       ORDER BY p.CreatedAt DESC`);
   return Promise.all(result.recordset.map(async (row) => ({
     ...mapPlan(row),
@@ -328,7 +327,7 @@ const updateSessionsToRejected = async (transaction, therapyPlanId) => {
 module.exports = {
   getTransaction,
   getPractitionerByUserId,
-  getPendingRequestsByPractitionerId,
+  getRequestsByPractitionerId,
   getRequestDetailsByPractitionerId,
   getRequestOwner,
   getTherapyPlanForUpdate,

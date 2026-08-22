@@ -9,7 +9,7 @@ const validate = (req, res) => {
 
 const listRequests = async (req, res, next) => {
   try {
-    return response.ok(res, { requests: await service.listPendingRequests(req.user) });
+    return response.ok(res, { requests: await service.listRequests(req.user) });
   } catch (error) {
     next(error);
   }
