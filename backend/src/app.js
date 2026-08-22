@@ -9,9 +9,11 @@ const adminPrecautionRoutes = require('./routes/adminPrecautionRoutes');
 const availabilityRoutes = require('./routes/availabilityRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const practitionerRequestRoutes = require('./routes/practitionerRequestRoutes');
+const practitionerTrackingRoutes = require('./routes/practitionerTrackingRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const patientAppointmentRoutes = require('./routes/patientAppointmentRoutes');
 const patientTherapyRoutes = require('./routes/patientTherapyRoutes');
+const patientTrackingRoutes = require('./routes/patientTrackingRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
@@ -38,9 +40,11 @@ app.use('/api/admin/therapy-precautions', adminPrecautionRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/practitioner', practitionerRequestRoutes);
+app.use('/api/practitioner', practitionerTrackingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/patient', patientAppointmentRoutes);
 app.use('/api/patient/therapies', patientTherapyRoutes);
+app.use('/api/patient', patientTrackingRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
 app.use(errorMiddleware);

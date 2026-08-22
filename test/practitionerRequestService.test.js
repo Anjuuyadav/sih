@@ -36,7 +36,7 @@ const createStub = (overrides = {}) => {
   const calls = { planConfirmed: 0, sessionsConfirmed: 0, planRejected: 0, sessionsRejected: 0 };
   const methods = {
     getPractitionerByUserId: async () => ({ PractitionerId: 5, UserId: 50, IsActive: true }),
-    getPendingRequestsByPractitionerId: async () => [],
+    getRequestsByPractitionerId: async () => [],
     getRequestDetailsByPractitionerId: async () => null,
     getRequestOwner: async () => null,
     getTransaction: async () => transaction,
@@ -67,9 +67,9 @@ const withRepository = async (stub, callback) => {
   }
 };
 
-test('practitioner can list only their own pending requests', async () => {
+test('practitioner can list only their own requests via authenticated scope', async () => {
   const stub = createStub({
-    getPendingRequestsByPractitionerId: async (practitionerId) => {
+    getRequestsByPractitionerId: async (practitionerId) => {
       assert.equal(practitionerId, 5);
       return [{
         therapyPlanId: 25,
@@ -85,19 +85,19 @@ test('practitioner can list only their own pending requests', async () => {
       }];
     },
   });
-  const result = await withRepository(stub, () => service.listPendingRequests(authenticatedPractitioner));
+  const result = await withRepository(stub, () => service.listRequests(authenticatedPractitioner));
   assert.equal(result.length, 1);
   assert.equal(result[0].therapyPlanId, 25);
 });
 
 test('practitioner cannot list another practitioner request because repository scope is authenticated id', async () => {
   const stub = createStub({
-    getPendingRequestsByPractitionerId: async (practitionerId) => {
+    getRequestsByPractitionerId: async (practitionerId) => {
       assert.equal(practitionerId, 5);
       return [];
     },
   });
-  const result = await withRepository(stub, () => service.listPendingRequests(authenticatedPractitioner));
+  const result = await withRepository(stub, () => service.listRequests(authenticatedPractitioner));
   assert.deepEqual(result, []);
 });
 

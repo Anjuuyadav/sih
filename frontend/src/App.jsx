@@ -10,8 +10,11 @@ import BookTherapy from './pages/patient/BookTherapy';
 import MyAppointments from './pages/patient/MyAppointments';
 import Notifications from './pages/patient/Notifications';
 import Feedback from './pages/patient/Feedback';
+import TherapyTracking from './pages/patient/TherapyTracking';
 import PractitionerDashboard from './pages/practitioner/PractitionerDashboard';
 import SessionRequestDetails from './pages/practitioner/SessionRequestDetails';
+import PractitionerTherapyTracking from './pages/practitioner/PractitionerTherapyTracking';
+import PractitionerPatientTrackingDetails from './pages/practitioner/PractitionerPatientTrackingDetails';
 
 const Dashboard = () => {
   const { user, logout } = React.useContext(AuthContext);
@@ -110,6 +113,18 @@ const Dashboard = () => {
               </p>
             </Link>
 
+            <Link
+              to="/patient/therapy-tracking"
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50"
+            >
+              <p className="text-sm font-semibold text-slate-900">
+                Therapy tracking
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Follow your session progress and completion history.
+              </p>
+            </Link>
+
           </section>
         )}
 
@@ -187,6 +202,7 @@ const App = () => (
             <Route path="/patient/appointments" element={<MyAppointments />} />
             <Route path="/patient/notifications" element={<Notifications />} />
             <Route path="/patient/feedback" element={<Feedback />} />
+            <Route path="/patient/therapy-tracking" element={<TherapyTracking />} />
           </Route>
 
           {/* Practitioner Routes */}
@@ -201,6 +217,16 @@ const App = () => (
             <Route
               path="/practitioner/dashboard"
               element={<PractitionerDashboard />}
+            />
+
+            <Route
+              path="/practitioner/therapy-tracking"
+              element={<PractitionerTherapyTracking />}
+            />
+
+            <Route
+              path="/practitioner/therapy-tracking/:patientId"
+              element={<PractitionerPatientTrackingDetails />}
             />
 
             <Route

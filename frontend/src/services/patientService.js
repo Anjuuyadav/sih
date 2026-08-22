@@ -20,4 +20,6 @@ export const createBooking = async (booking) => request('post', '/bookings', boo
 
 export const getAppointments = async () => (await request('get', '/patient/appointments')).data || [];
 
+export const getTherapyTracking = async () => (await request('get', '/patient/therapy-tracking')).data;
+
 export const getNotifications = async () => (await request('get', '/notifications')).notifications || [];

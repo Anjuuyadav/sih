@@ -56,7 +56,10 @@ const PractitionerDashboard = () => {
       <div className="mx-auto max-w-7xl">
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div><p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary-600">Panchkarma Care</p><h1 className="mt-2 text-3xl font-semibold text-slate-900">Practitioner Dashboard</h1><p className="mt-1 text-slate-500">Welcome back{user?.name ? `, ${user.name}` : ''}. Review incoming therapy requests.</p></div>
-          <button type="button" onClick={logout} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"><FiLogOut /> Logout</button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to="/practitioner/therapy-tracking" className="rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700">Therapy Tracking</Link>
+            <button type="button" onClick={logout} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"><FiLogOut /> Logout</button>
+          </div>
         </header>
 
         {error && <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-error-500/20 bg-error-50 px-4 py-3 text-sm text-error-600"><span>{error}</span><button type="button" onClick={loadRequests} className="flex items-center gap-2 font-semibold underline"><FiRefreshCw /> Retry</button></div>}

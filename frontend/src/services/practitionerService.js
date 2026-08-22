@@ -15,3 +15,6 @@ export const getSessionRequests = async () => (await request('get', '/practition
 export const getSessionRequestDetails = async (therapyPlanId) => (await request('get', `/practitioner/session-requests/${therapyPlanId}`)).request;
 export const acceptSessionRequest = (therapyPlanId) => request('post', `/practitioner/session-requests/${therapyPlanId}/accept`);
 export const rejectSessionRequest = (therapyPlanId, rejectionReason) => request('post', `/practitioner/session-requests/${therapyPlanId}/reject`, { rejectionReason });
+export const getTrackingPatients = async () => (await request('get', '/practitioner/therapy-tracking/patients')).data || [];
+export const getTrackingPatientDetails = async (patientId) => (await request('get', `/practitioner/therapy-tracking/patients/${patientId}`)).data;
+export const completeTrackingSession = async (sessionId) => (await request('patch', `/practitioner/therapy-tracking/sessions/${sessionId}/complete`)).data;
